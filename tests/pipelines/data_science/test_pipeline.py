@@ -55,14 +55,22 @@ def test_data_science_pipeline(caplog, dummy_data, dummy_parameters):
     pipeline = (
         create_ds_pipeline().from_nodes("split_data_node").to_nodes("train_model_node")
     )
-    catalog = DataCatalog()
+    import yaml
+    conf_catalog = """
+'{catch_all}':
+    "type": "pickle.PickleDataset"
+    "filepath": "data/{catch_all}.pkl"
+"""
+    conf_catalog = yaml.safe_load(conf_catalog)
+    # catalog = DataCatalog()
+    catalog = DataCatalog.from_config(conf_catalog)
     catalog.add_feed_dict(
         {
             "model_input_table": dummy_data,
             "params:model_options": dummy_parameters["model_options"],
         }
     )
-    
+
     runner = SequentialRunner(
         extra_dataset_patterns={
             "catch_all": {
@@ -71,7 +79,7 @@ def test_data_science_pipeline(caplog, dummy_data, dummy_parameters):
             }
         }
     )
-    # Shouldn't print a or b as now the data is persisted and should not be kept in memory
+    # Now a,b are empty. So adding pattern in yaml or runner create different result.
     a = SequentialRunner().run(pipeline, catalog)
     b = SequentialRunner().run(pipeline, catalog)
     print(f"{a=}")
