@@ -62,14 +62,16 @@ def test_data_science_pipeline(caplog, dummy_data, dummy_parameters):
             "params:model_options": dummy_parameters["model_options"],
         }
     )
+    
     runner = SequentialRunner(
-        # extra_dataset_patterns={
-        #     "catch_all": {
-        #         "type": "pickle.PickleDataset",
-        #         "filepath": "data/{catch_all}.pkl",
-        #     }
-        # }
+        extra_dataset_patterns={
+            "catch_all": {
+                "type": "pickle.PickleDataset",
+                "filepath": "data/{catch_all}.pkl",
+            }
+        }
     )
+    # Shouldn't print a or b as now the data is persisted and should not be kept in memory
     a = SequentialRunner().run(pipeline, catalog)
     b = SequentialRunner().run(pipeline, catalog)
     print(f"{a=}")
